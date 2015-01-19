@@ -33,3 +33,5 @@ proguard/
 .DS_Store
 /build
 .idea/*
+/app/build/
+app/build/
