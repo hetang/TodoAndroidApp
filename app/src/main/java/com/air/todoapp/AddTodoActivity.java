@@ -10,7 +10,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import org.apache.commons.io.FileUtils;
 
@@ -24,6 +23,7 @@ public class AddTodoActivity extends ActionBarActivity {
 
     private ListView lvTodoItems;
     private EditText etAddTodo;
+    private TodoDBHelper mydb;
 
     private List<String> items;
     private ArrayAdapter<String> itemsAdaptor;
@@ -34,9 +34,11 @@ public class AddTodoActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_todo);
+        mydb = new TodoDBHelper(this);
         etAddTodo = (EditText) findViewById(R.id.etAddTodo);
         lvTodoItems = (ListView) findViewById(R.id.lvTodoItems);
-        readItems();
+        items = mydb.getAllTodoItem();
+        //readItems();
         itemsAdaptor = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
         lvTodoItems.setAdapter(itemsAdaptor);
         setupListViewListener();
@@ -50,7 +52,8 @@ public class AddTodoActivity extends ActionBarActivity {
                                                    View item, int pos, long id) {
                         items.remove(pos);
                         itemsAdaptor.notifyDataSetChanged();
-                        writeItems();
+                        mydb.deleteTodoItem(pos+1);
+                        //writeItems();
                         return true;
                     }
                 }
@@ -120,11 +123,13 @@ public class AddTodoActivity extends ActionBarActivity {
             int pos = data.getExtras().getInt("listPos", -1);
             if(pos == -1) {
                 items.add(todoItem);
+                mydb.insertTodoItem(todoItem);
             } else {
                 items.set(pos, todoItem);
+                mydb.updateTodoItem(pos+1, todoItem);
             }
             itemsAdaptor.notifyDataSetChanged();
-            writeItems();
+            //writeItems();
         }
     }
 
@@ -132,6 +137,7 @@ public class AddTodoActivity extends ActionBarActivity {
         String todoItem = etAddTodo.getText().toString();
         itemsAdaptor.add(todoItem);
         etAddTodo.setText("");
-        writeItems();
+        mydb.insertTodoItem(todoItem);
+        //writeItems();
     }
 }
