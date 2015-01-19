@@ -1,5 +1,6 @@
 package com.air.todoapp;
 
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -9,6 +10,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.apache.commons.io.FileUtils;
 
@@ -22,8 +24,11 @@ public class AddTodoActivity extends ActionBarActivity {
 
     private ListView lvTodoItems;
     private EditText etAddTodo;
+
     private List<String> items;
     private ArrayAdapter<String> itemsAdaptor;
+
+    private final int REQUEST_CODE = 20;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +52,20 @@ public class AddTodoActivity extends ActionBarActivity {
                         itemsAdaptor.notifyDataSetChanged();
                         writeItems();
                         return true;
+                    }
+                }
+        );
+
+        lvTodoItems.setOnItemClickListener(
+                new AdapterView.OnItemClickListener(){
+                    @Override
+                    public void onItemClick(AdapterView<?> adapter,
+                                               View item, int pos, long id) {
+                        String todoItem = items.get(pos);
+                        Intent i = new Intent(AddTodoActivity.this, EditTodoActivity.class);
+                        i.putExtra("todoItem", todoItem);
+                        i.putExtra("listPos", pos);
+                        startActivityForResult(i, REQUEST_CODE);
                     }
                 }
         );
@@ -92,6 +111,21 @@ public class AddTodoActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
+            String todoItem = data.getExtras().getString("todoItem");
+            int pos = data.getExtras().getInt("listPos", -1);
+            if(pos == -1) {
+                items.add(todoItem);
+            } else {
+                items.set(pos, todoItem);
+            }
+            itemsAdaptor.notifyDataSetChanged();
+            writeItems();
+        }
     }
 
     public void addTodoItem(View view) {
