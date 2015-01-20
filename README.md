@@ -9,6 +9,7 @@ Completed user stories:
  * [x] Build initial todo app
  * [x] Add edit functionality to todo app
  * [x] Optional: Persist the todo items into SQLite instead of a text file
+ * [x] Optional: Improve style of the todo items in the list using a custom adapter
 
 Walkthrough of all user stories:
 
