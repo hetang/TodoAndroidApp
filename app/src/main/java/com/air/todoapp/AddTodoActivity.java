@@ -11,6 +11,9 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
+import com.air.todoapp.adaptor.TodoAdaptor;
+import com.air.todoapp.model.TodoItem;
+
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -25,8 +28,8 @@ public class AddTodoActivity extends ActionBarActivity {
     private EditText etAddTodo;
     private TodoDBHelper mydb;
 
-    private List<String> items;
-    private ArrayAdapter<String> itemsAdaptor;
+    private List<TodoItem> items;
+    private TodoAdaptor todoAdapter;
 
     private final int REQUEST_CODE = 20;
 
@@ -38,9 +41,8 @@ public class AddTodoActivity extends ActionBarActivity {
         etAddTodo = (EditText) findViewById(R.id.etAddTodo);
         lvTodoItems = (ListView) findViewById(R.id.lvTodoItems);
         items = mydb.getAllTodoItem();
-        //readItems();
-        itemsAdaptor = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items);
-        lvTodoItems.setAdapter(itemsAdaptor);
+        todoAdapter = new TodoAdaptor(this, items);
+        lvTodoItems.setAdapter(todoAdapter);
         setupListViewListener();
     }
 
@@ -51,9 +53,8 @@ public class AddTodoActivity extends ActionBarActivity {
                     public boolean onItemLongClick(AdapterView<?> adapter,
                                                    View item, int pos, long id) {
                         items.remove(pos);
-                        itemsAdaptor.notifyDataSetChanged();
+                        todoAdapter.notifyDataSetChanged();
                         mydb.deleteTodoItem(pos+1);
-                        //writeItems();
                         return true;
                     }
                 }
@@ -64,34 +65,14 @@ public class AddTodoActivity extends ActionBarActivity {
                     @Override
                     public void onItemClick(AdapterView<?> adapter,
                                                View item, int pos, long id) {
-                        String todoItem = items.get(pos);
+                        TodoItem todoItem = items.get(pos);
                         Intent i = new Intent(AddTodoActivity.this, EditTodoActivity.class);
-                        i.putExtra("todoItem", todoItem);
+                        i.putExtra("todoItem", todoItem.getItem());
                         i.putExtra("listPos", pos);
                         startActivityForResult(i, REQUEST_CODE);
                     }
                 }
         );
-    }
-
-    private void readItems() {
-        File filesDir = getFilesDir();
-        File todoFile = new File(filesDir, "todo.txt");
-        try {
-            items = new ArrayList<String>(FileUtils.readLines(todoFile));
-        }catch(IOException e) {
-            items = new ArrayList<String>();
-        }
-    }
-
-    private void writeItems() {
-        File filesDir = getFilesDir();
-        File todoFile = new File(filesDir, "todo.txt");
-        try {
-            FileUtils.writeLines(todoFile, items);
-        }catch(IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -122,22 +103,20 @@ public class AddTodoActivity extends ActionBarActivity {
             String todoItem = data.getExtras().getString("todoItem");
             int pos = data.getExtras().getInt("listPos", -1);
             if(pos == -1) {
-                items.add(todoItem);
+                items.add(new TodoItem(todoItem));
                 mydb.insertTodoItem(todoItem);
             } else {
-                items.set(pos, todoItem);
+                items.set(pos, new TodoItem(todoItem));
                 mydb.updateTodoItem(pos+1, todoItem);
             }
-            itemsAdaptor.notifyDataSetChanged();
-            //writeItems();
+            todoAdapter.notifyDataSetChanged();
         }
     }
 
     public void addTodoItem(View view) {
         String todoItem = etAddTodo.getText().toString();
-        itemsAdaptor.add(todoItem);
+        todoAdapter.add(new TodoItem(todoItem));
         etAddTodo.setText("");
         mydb.insertTodoItem(todoItem);
-        //writeItems();
     }
 }

@@ -7,6 +7,8 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.air.todoapp.model.TodoItem;
+
 import java.util.ArrayList;
 
 /**
@@ -62,7 +64,7 @@ public class TodoDBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(CONTACTS_COLUMN_NAME, todoItem);
-        db.update(CONTACTS_TABLE_NAME, contentValues, CONTACTS_COLUMN_ID + " = ? ", new String[] { Integer.toString(id) } );
+        db.update(CONTACTS_TABLE_NAME, contentValues, CONTACTS_COLUMN_ID + " = ? ", new String[]{Integer.toString(id)});
         return true;
     }
 
@@ -73,15 +75,16 @@ public class TodoDBHelper extends SQLiteOpenHelper {
                 CONTACTS_COLUMN_ID + " = ? ",
                 new String[] { Integer.toString(id) });
     }
-    public ArrayList<String> getAllTodoItem()
+    public ArrayList<TodoItem> getAllTodoItem()
     {
-        ArrayList<String> array_list = new ArrayList<String>();
+        ArrayList<TodoItem> array_list = new ArrayList<TodoItem>();
         //hp = new HashMap();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res =  db.rawQuery( "select * from " + CONTACTS_TABLE_NAME, null );
         res.moveToFirst();
         while(res.isAfterLast() == false){
-            array_list.add(res.getString(res.getColumnIndex(CONTACTS_COLUMN_NAME)));
+            TodoItem item = new TodoItem(res.getString(res.getColumnIndex(CONTACTS_COLUMN_NAME)));
+            array_list.add(item);
             res.moveToNext();
         }
         return array_list;
